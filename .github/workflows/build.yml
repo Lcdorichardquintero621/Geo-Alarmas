@@ -1,0 +1,27 @@
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descomprimir
+        run: unzip -q -o GeoAlarm.zip
+      - name: Poner clave de Maps
+        run: sed -i "s|TU_API_KEY_DE_GOOGLE_MAPS|${{ secrets.MAPS_API_KEY }}|" GeoAlarm/app/src/main/AndroidManifest.xml
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+      - name: Compilar
+        working-directory: GeoAlarm
+        run: gradle assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Geo-Alarma-APK
+          path: GeoAlarm/app/build/outputs/apk/debug/app-debug.apk
